@@ -1,2 +1,6 @@
 resolver: lts-5.2
+extra-deps:
+- pandoc-crossref-0.1.6.5
+- data-accessor-transformers-0.2.1.7
+
 

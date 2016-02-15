@@ -16,11 +16,12 @@ import Text.Pandoc.Walk (walk)
 import Data.Maybe (fromMaybe)
 
 import Hakyll hiding (pandocCompiler)
-
 import qualified Data.Set as Set
+import Text.Pandoc.CrossRef (runCrossRef, crossRefMeta, crossRefBlocks,
+                             secPrefix)
+import Text.Pandoc.Builder hiding (code)
 
 import Data.List (find) -- TODO: necessary?
-
 import Text.Blaze.Html (preEscapedToHtml, (!))
 import Text.Blaze.Html.Renderer.String (renderHtml)
 import qualified Text.Blaze.Html5 as H
@@ -45,6 +46,7 @@ pandocCompiler streams = do
   let transformer =
         return . abbreviations abbrs
         >=> return . codeBreak
+        >=> return . crossRefs
         >=> pygments streams
         >=> return . tableOfContents alignment
 
@@ -52,6 +54,16 @@ pandocCompiler streams = do
 
 codeBreak :: Pandoc -> Pandoc
 codeBreak = walk breakChars
+
+crossRefs :: Pandoc -> Pandoc
+crossRefs p@(Pandoc meta _) = runCrossRef metax fmt action p
+      where
+        fmt = Nothing
+        metax = secPrefix [str "section", str "sections"] <> meta
+        action (Pandoc _ bs) = do
+          meta' <- crossRefMeta
+          bs' <- crossRefBlocks bs
+          return $ Pandoc meta' bs'
 
 -- | This AST inserts a <http://en.wikipedia.org/wiki/Zero-width_space zero-width space>
 -- before every matched delimiter.
