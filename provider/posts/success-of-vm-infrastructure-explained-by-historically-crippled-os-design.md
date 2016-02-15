@@ -1,8 +1,10 @@
 ---
 title: Success of VM infrastructure explained by historically crippled OS design
-link: http://www.aloni.org/success-of-vm-infrastructure-explained-by-historically-crippled-os-design/
+excerpt: OSes
+link: http://www.blog.aloni.org/success-of-vm-infrastructure-explained-by-historically-crippled-os-design/
 author: dan
 post_id: 217
+published: 2010-12-22
 created: 2010/12/22 14:47:38
 created_gmt: 2010/12/22 14:47:38
 comment_status: open

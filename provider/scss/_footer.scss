@@ -1,63 +1,34 @@
 #footer {
-  border-top: 1px solid #efefef;
-  padding: 15px 0;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
   text-align: center;
-  cursor: default;
+  color: #444444;
 
-  #credit {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    font-style: italic;
-    font-size: 12px;
-    color: #999;
-
-    a {
-      color: #555;
-      transition: color 0.3s;
-
-      &:hover {
-        color: #222;
-        text-decoration: underline;
-      }
-    }
+  a {
+    color: #444444;
   }
 
-  #social {
-    font-size: 18px;
-    color: #999;
+  ul {
+    box-sizing: border-box;
+    display: block;
+    line-height: 20pt;
+    list-style-image: none;
+    list-style-position: outside;
+    list-style-type: none;
+    margin-bottom: 10px;
+    margin-top: 0px;
+    padding-left: 0px;
+  }
 
-    a {
-      color: $color-gray02;
-      transition: color 0.3s;
-      padding: 20px;
-
-      @media screen and (max-width: 600px) {
-        padding: 10px;
-      }
-
-      @media not screen and (max-width: 600px), not screen and (max-width: 766px) {
-        &:hover {
-          color: $color-gray01;
-        }
-      }
-    }
-
-    a[title="twitter"]:hover {
-      color: #2eb8e7;
-    }
-
-    a[title="github"]:hover {
-      color: #286da3;
-    }
-
-    a[title="stackoverflow"]:hover,
-    a[title="feed"]:hover {
-      color: #d85620;
-    }
-
-    a[title="email"]:hover {
-      color: #f66;
-    }
+  li {
+    box-sizing: border-box;
+    display: inline-block;
+    line-height: 20pt;
+    list-style-image: none;
+    list-style-position: outside;
+    list-style-type: none;
+    padding-right: 5px;
+    padding-left: 5px;
   }
 }
 

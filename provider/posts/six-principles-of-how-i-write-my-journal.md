@@ -1,8 +1,10 @@
 ---
+excerpt: Writing
 title: Six Principles of How I Write My Journal
-link: http://www.aloni.org/six-principles-of-how-i-write-my-journal/
+link: http://www.blog.aloni.org/six-principles-of-how-i-write-my-journal/
 author: dan
 post_id: 393
+published: 2014-03-23
 created: 2014/03/23 16:21:58
 created_gmt: 2014/03/23 14:21:58
 comment_status: open

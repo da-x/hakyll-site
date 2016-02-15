@@ -13,23 +13,21 @@ module Site.Contexts (
 
 import Hakyll hiding (titleField)
 import Data.Monoid ((<>))
-import System.Process
 import System.FilePath
 
 import Data.List (groupBy, intersperse, intersperse)
 import Data.Maybe (catMaybes)
+import Data.Time.Clock
 import Control.Monad (forM)
 import Control.Applicative (empty)
 import Data.Time.Locale.Compat (defaultTimeLocale)
--- import System.Locale (defaultTimeLocale)
-import Data.Time.Clock
 import Data.Time.Calendar
 
 import           Text.Blaze.Html                 (toHtml, toValue, (!))
 import           Text.Blaze.Html.Renderer.String (renderHtml)
 import qualified Text.Blaze.Html5                as H
 import qualified Text.Blaze.Html5.Attributes     as A
-
+import System.IO.Unsafe
 import Site.Routes
 
 import Data.Function (on)
@@ -57,9 +55,22 @@ defaultCtx = mconcat
   , pathField "path"
   , constField "commentsJS" ""
   , constField "pushJS" ""
-  , constField "title" "Blaenk Denum"
+  , constField "title" "Dan Aloni's blog"
+  , yearCtx
   , missingField
   ]
+
+yearCtx :: Context String
+yearCtx = field "year" $ \_ -> return year
+    where year = unsafePerformIO $ getCurrentYear
+
+getCurrentYear :: IO String
+getCurrentYear = do
+    (year, _, _) <- date
+    return $ show year
+    where
+        date = getCurrentTime >>= return . toGregorian . utctDay
+
 
 postCtx :: Bool -> Context String
 postCtx preview = mconcat
@@ -67,7 +78,6 @@ postCtx preview = mconcat
   , dateField "dateArchive" "%b %e"
   , commentsTag "comments"
   , commentsJS "commentsJS"
-  , gitTag "git"
   , socialTag "social"
   , pushJS "pushJS"
   , previewMode preview
@@ -91,10 +101,10 @@ tagsCtx pat tag = mconcat
 titleField :: Context String
 titleField = field "pageTitle" $ \item -> do
   title <- getMetadataField (itemIdentifier item) "title"
-  maybe (return "Blaenk Denum") (return . (++ " - Blaenk Denum")) title
+  maybe (return "Dan Aloni") (return . (++ " - Dan Aloni")) title
 
 customTitleField :: String -> Context String
-customTitleField value = constField "pageTitle" $ value ++ " - Blaenk Denum"
+customTitleField value = constField "pageTitle" $ value ++ " - Dan Aloni's blog"
 
 -- url field without /index.html
 niceUrlField :: String -> Context a
@@ -179,33 +189,6 @@ socialTag key = field key $ \item -> do
   if null links
     then return ""
     else return . renderHtml . mconcat $ links
-
-gitTag :: String -> Context String
-gitTag key = field key $ \item -> do
-  let fp = "provider/" ++ (toFilePath $ itemIdentifier item)
-      gitLog format =
-        readProcess "git" [
-          "log"
-        , "-1"
-        , "HEAD"
-        , "--pretty=format:" ++ format
-        , fp
-        ] ""
-
-  unsafeCompiler $ do
-    sha     <- gitLog "%h"
-    message <- gitLog "%s"
-
-    let history = "https://github.com/blaenk/blaenk.github.io/commits/source/" ++ fp
-        commit  = "https://github.com/blaenk/blaenk.github.io/commit/" ++ sha
-
-    return $ if null sha
-               then "Not Committed"
-               else renderHtml $ do
-                      H.a ! A.href (toValue history) $ "History"
-                      H.span ! A.class_ "hash" $ do
-                        toHtml (", " :: String)
-                        H.a ! A.href (toValue commit) ! A.title (toValue message) $ toHtml sha
 
 groupedArchives :: Pattern -> Compiler [Item (Integer, [Item String])]
 groupedArchives pat =

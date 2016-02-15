@@ -4,7 +4,7 @@ $color-gray02: #999999;
 $color-gray03: #cccccc;
 $color-gray04: #dddddd;
 
-$font-default: 'Merriweather', Georgia, serif;
+$font-default: "Open Sans", Helvetica, Arial, sans-serif;
 $font-sans: 'Noto Sans', Helvetica, Arial, sans-serif;
 $font-mono: Menlo, Monaco, 'DejaVu Sans Mono', Consolas, monospace;
 $font-icon: FontAwesome;
@@ -14,12 +14,36 @@ $font-icon: FontAwesome;
   padding: 0;
 }
 
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(/static/opensans/cJZKeOuBrn4kERxqtaUH3aCWcynf_cDxXwCLxiixG1c.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Open Sans Bold'), local('OpenSans-Bold'), url(/static/opensans/k3k702ZOKiLJc3WVjuplzInF5uFdDttMLvmWuJdhhgs.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Open Sans Italic'), local('OpenSans-Italic'), url(/static/opensans/xjAJXh38I15wypJXxuGMBp0EAVxt0G0biEntp43Qt6E.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Open Sans Bold Italic'), local('OpenSans-BoldItalic'), url(/static/opensans/PRmiXeptR36kaC0GEAetxp_TkvowlIOtbR7ePgFOpF4.ttf) format('truetype');
+}
+
 body {
-  border-top: 3px solid #08b5e5;
   font-family: $font-default;
   font-weight: 400;
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.4;
   background: white;
   color: $color-gray01;
   -webkit-text-size-adjust: 100%;

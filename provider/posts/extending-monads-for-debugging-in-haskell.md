@@ -1,8 +1,10 @@
 ---
 title: Extending Monads for debugging in Haskell
-link: http://www.aloni.org/extending-monads-for-debugging-in-haskell/
+excerpt: Haskell
+link: http://www.blog.aloni.org/extending-monads-for-debugging-in-haskell/
 author: dan
 post_id: 331
+published: 2012-07-02
 created: 2012/07/02 13:39:25
 created_gmt: 2012/07/02 10:39:25
 comment_status: open

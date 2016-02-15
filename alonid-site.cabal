@@ -1,10 +1,10 @@
-name:             blaenk
+name:             alonid-site
 version:          1.0
 synopsis:         Personal Site
-homepage:         http://blaenkdenum.com
+homepage:         http://blog.aloni.org
 license:          BSD3
-author:           Jorge Israel Peña
-maintainer:       jorge.israel.p@gmail.com
+author:           Dan Aloni
+maintainer:       alonid@gmail.com
 category:         Web
 build-type:       Custom
 cabal-version:    >=1.8

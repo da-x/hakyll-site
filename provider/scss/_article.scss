@@ -23,6 +23,13 @@ article {
   .entry-content {
     padding-bottom: 15px;
 
+    @media not screen and (max-width: 500px) {
+      text-align: justify;
+      -webkit-hyphens: auto;
+      -moz-hyphens: auto;
+      hyphens: auto;
+    }
+
     // DEFAULTS
     h1, h2, h3, h4, h5 { line-height: 2; }
 
@@ -351,7 +358,7 @@ article {
     h1, h2, h3, h4, h5, {
       overflow: hidden;
       position: static;
-      font-weight: 400;
+      font-weight: 550;
 
       @media not screen and (max-width: 600px), not screen and (max-width: 766px) {
         &:hover .hash {

@@ -1,16 +1,17 @@
 ---
-title: Build maneuverings with external Linux kernel modules
 author: dan
+title: Build maneuverings with external Linux kernel modules
+excerpt: Linux Kernel
+published: 2014-12-12
 ---
 
 Much of the material relating to writing [Linux kernel](http://en.wikipedia.org/wiki/Linux_kernel) modules does not discuss the scenario where you would like to replace existing kernel code or a driver with a wrapping interface, or a whole new implementation of the same component, or another scenario where you have one external kernel module that depends on another. Our Linux kernel is a standalone component and it doesn't like these sort of tricks, but its build system is advanced enough to allow to implement them cleanly.
 
-### First, just a plain-old module ###
+# First, just a plain-old module #
 
 To demonstrate the topics I am about to discuss, let's create a simple kernel module that we can work with:
 
-`foo/Makefile`:
-
+> ##### `foo/Makefile` #####
 ```makefile
 foo-objs += foo-main.o
 obj-m += foo.o
@@ -18,8 +19,7 @@ obj-m += foo.o
 
 The following .gitignore file can be used:
 
-`.gitignore`:
-
+> ##### `.gitignore` #####
 ```
 *.o
 *.mod.o
@@ -44,7 +44,7 @@ EXPORT_SYMBOL(foo_export);
 
 Building it for the currently running kernel is quite simple:
 
-```shell
+```
 $ make -C /lib/modules/`uname -r`/source M=`pwd`/foo
 make: Entering directory `/usr/src/kernels/3.17.3-200.fc20.x86_64'
   CC [M]  /home/dan/module/foo/foo-main.o
@@ -57,7 +57,7 @@ make: Leaving directory `/usr/src/kernels/3.17.3-200.fc20.x86_64'
 
 We should be able to load it via `insmod foo/foo.ko`. But, since the module does not do anything, and does not register on any subsystem, it is effectively just a library. A novice reader can add call to `foo_export` on module init. For now we will continue to focus on the building scriptology in this post.
 
-### Prepare for external access ###
+# Prepare for external access #
 
 We would like for another module to use our kernel code. But first, we need to export it via the standard C means, because `EXPORT_MODULE` is not enough - this just tells the kernel that it is okay to link against `foo_export` in module load time.
 
@@ -94,7 +94,7 @@ We can now proceed to also add `#include <foo/foo.h>` in `foo-main.c`.
 
 **NOTE:** The `LINUXINCLUDE` directive in kbuild is very useful - it allows to insert new include paths before or after other paths or the kernel headers themselves. Here, we needed abstraction for our private module include paths. The module's code is now agnostic to where headers are located, which is a good preparation for any future point in time where the headers might move, and perhaps these headers can move into the kernel itself if our kernel code is really dandy and useful - who knows.
 
-### A second, dependent kernel module ###
+# A second, dependent kernel module #
 
 Similarly to `foo`, we have created `bar`. However, in bar we insert a run-time dependency over foo:
 
@@ -119,7 +119,7 @@ But we would like to avoid the following error:
  #include <foo/foo.h>
 ```
 
-Let's take the first step. We need to depend on `foo` in `bar`. If we would like to be completely flexible, we can support the modes where foo arrives frm the kernel itself or from another external kernel module.
+Let's take the first step. We need to depend on `foo` in `bar`. If we would like to be completely flexible, we can support the modes where foo arrives from the kernel itself or from another external kernel module.
 
 `bar/Makefile`:
 ```makefile
@@ -195,7 +195,7 @@ make: Leaving directory `/home/dan/test/bar'
 ```
 There are several things consider. `foo` must already be built when `bar` is built, otherwise `foo`'s `Module.symvers` is missing, and you would get a warning. The other thing to keep in mind is that the Makefile is evaluated twice - once in our direct execution and a second time when kbuild evaluates it. The current directory (\`pwd\`) in the second evaluation is the kernel tree, and it already contains a lots of useful bits such as `LINUXINCLUDE`. We should be careful about kbuild's own evaluation so that we don't accidently override stuff that we did not intend or insert makefile targets that don't belong under the kbuild environment.
 
-### Careful replacement ###
+# Careful replacement #
 
 Note that the use of `LINUXINCLUDE` to replace existing kernel headers should be used with care. It is powerful enough to allow re-packaging of whole stacks of code that overlap with existing kernel software stack. Some kernel subsystems are spreading their headers over paths that don't necessarily start with `linux/`, for example, `uapi/linux` (user space headers), and `asm/` (architecture specific headers, actually located under `arch/*/include`). Ordering of paths when extending `LINUXINCLUDE` is key in that case.
 

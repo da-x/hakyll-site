@@ -36,13 +36,20 @@ hakyllConf = defaultConfiguration {
       where name = takeFileName path
 
 feedConf :: FeedConfiguration
-feedConf = FeedConfiguration {
-    feedTitle = "Jorge Israel Peña"
-  , feedDescription = "Personal Site"
-  , feedAuthorName = "Jorge Israel Peña"
-  , feedAuthorEmail = "jorge.israel.p@gmail.com"
-  , feedRoot = "http://www.blaenkdenum.com"
-  }
+feedConf = FeedConfiguration
+    { feedTitle       = "Dan Aloni"
+    , feedDescription = "Dan Aloni's blog"
+    , feedAuthorName  = "Dan Aloni"
+    , feedAuthorEmail = "alonid@gmail.com"
+    , feedRoot        = "http://blog.aloni.org"
+    }
+
+feedCtx :: Context String
+feedCtx = mconcat
+    [ bodyField "description"
+    , dateField "date" "%B %e, %Y"
+    , defaultContext
+    ]
 
 cleanPreview :: IO ()
 cleanPreview = do
@@ -139,6 +146,13 @@ main = do
 
     match postsPattern $ version "feed" $
       compile pandocFeedCompiler
+
+    create ["rss.xml"] $ do
+      route idRoute
+      compile $ do
+        loadAll (postsPattern .&&. hasVersion "feed")
+          >>= fmap (take 10) . recentFirst
+          >>= renderRss feedConf feedCtx
 
     create ["atom.xml"] $ do
       route idRoute
