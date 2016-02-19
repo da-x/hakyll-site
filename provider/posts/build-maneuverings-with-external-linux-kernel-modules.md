@@ -11,16 +11,14 @@ Much of the material relating to writing [Linux kernel](http://en.wikipedia.org/
 
 To demonstrate the topics I am about to discuss, let's create a simple kernel module that we can work with:
 
-> ##### `foo/Makefile` #####
-```makefile
+``` { .gmake fancydiff=on title="foo/Makefile" }
 foo-objs += foo-main.o
 obj-m += foo.o
 ```
 
 The following .gitignore file can be used:
 
-> ##### `.gitignore` #####
-```
+``` {fancydiff=on title=".gitignore" }
 *.o
 *.mod.o
 *.ko
@@ -31,8 +29,7 @@ Module.symvers
 
 The C file can be very minimal for now:
 
-`foo/foo-main.c`:
-```C
+``` { .clang fancydiff=on title="foo/foo-main.c" }
 #include <linux/kernel.h>
 
 void foo_export(void)
@@ -44,7 +41,7 @@ EXPORT_SYMBOL(foo_export);
 
 Building it for the currently running kernel is quite simple:
 
-```
+``` { .shell fancydiff=on }
 $ make -C /lib/modules/`uname -r`/source M=`pwd`/foo
 make: Entering directory `/usr/src/kernels/3.17.3-200.fc20.x86_64'
   CC [M]  /home/dan/module/foo/foo-main.o
@@ -63,9 +60,7 @@ We would like for another module to use our kernel code. But first, we need to e
 
 So we add this header under `foo/include`:
 
-`foo/include/foo/foo.h`:
-
-```C
+``` { .clang fancydiff=on title="foo/include/foo/foo.h" }
 #ifndef __FOO_MAIN_H__
 #define __FOO_MAIN_H__
 
@@ -76,8 +71,7 @@ void foo_export(void);
 
 We could have added a `foo.h` directly under `foo`, but that is not good because we would like to separate the interface from implementation. We expect other users to include the location of the header file via `-I`. Let's take care of our internal user `foo-main.c` too, by modifying the Makefile:
 
-`foo/Makefile`:
-```makefile
+``` { .gmake fancydiff=on title="foo/Makefile"}
 ifneq (${LINUXINCLUDE},)
 # If we being invoked from kbuild, prepend the proper include paths
 LINUXINCLUDE := \
@@ -98,8 +92,7 @@ We can now proceed to also add `#include <foo/foo.h>` in `foo-main.c`.
 
 Similarly to `foo`, we have created `bar`. However, in bar we insert a run-time dependency over foo:
 
-`bar/bar-main.c`:
-```C
+``` { .clang fancydiff=on title="bar/bar-main.c"}
 #include <linux/kernel.h>
 #include <bar/bar.h>
 #include <foo/foo.h>
@@ -114,15 +107,13 @@ EXPORT_SYMBOL(bar_export);
 
 But we would like to avoid the following error:
 
-```C
-/home/dan/test/bar/bar-main.c:2:21: fatal error: foo/foo.h: No such file or directory
- #include <foo/foo.h>
+``` { .shell fancydiff=on }
+/home/dan/test/bar/bar-main.c:2:21: fatal error: foo/foo.h: No such file or directory #include <foo/foo.h>
 ```
 
 Let's take the first step. We need to depend on `foo` in `bar`. If we would like to be completely flexible, we can support the modes where foo arrives from the kernel itself or from another external kernel module.
 
-`bar/Makefile`:
-```makefile
+``` { .gmake fancydiff=on title="bar/Makefile" }
 ifneq (${FOO_PATH},)
 FOO_INCLUDE=-I${FOO_PATH}/include
 endif
@@ -141,13 +132,13 @@ obj-m += bar.o
 
 By adding `foo` to `LINUXINCLUDE` we can now have a working build, if we point `FOO_PATH` to the correct place when building `bar`.
 
-```
+``` { .shell fancydiff=on }
 make -C /lib/modules/`uname -r`/source M=`pwd`/bar FOO_PATH=`pwd`/foo
 ```
 
 But is it not over yet, because we get an error from `modpost` (although the build is successful):
 
-```
+``` { .shell fancydiff=on }
 WARNING: "foo_export" [/home/dan/test/bar/bar.ko] undefined!
 ```
 
@@ -155,7 +146,8 @@ The kernel keeps track of which modules are exported by which binary code. By de
 
 
 `bar/Makefile`:
-```makefile
+
+``` { .gmake fancydiff=on }
 ifneq (${LINUXINCLUDE},)
 # If we being invoked from kbuild, prepend the proper include paths
 ifneq (${FOO_PATH},)
@@ -178,7 +170,7 @@ obj-m += bar.o
 
 In order to not make the command line any longer, we have inserted a proxy target 'all'. Also, `KBUILD_EXTRA_SYMBOLS` and `FOO_PATH` are forwarded to kbuild, and `KDIR` receives the path of the kernel tree from the top level invocation.
 
-```shell
+``` { .shell fancydiff=on }
 $ make -C bar KDIR=/lib/modules/`uname -r`/source FOO_PATH=`pwd`/foo
 make: Entering directory `/home/dan/test/bar'
 make -C /lib/modules/3.17.3-200.fc20.x86_64/source M=/home/dan/test/bar

@@ -23,7 +23,7 @@ However, sometimes we would also like to **keep the performance of the 'untraced
 
 In Haskell, this can come naturally as an extension of the Monad class, with the advantage of multiple instantation. To illustrate, let's extend Monad with MonadDebug:
 
-```haskell
+``` { .haskell fancydiff=1 }
 import Control.Monad.Identity (runIdentity, Identity)
 
 class Monad m => MonadDebug m where
@@ -40,8 +40,7 @@ Those instances make it possible to use class function `logDebug` directly under
 
 Let's define a sample computation function:
 
-
-```haskell
+``` {.haskell fancydiff=1 }
 computation :: MonadDebug m => Integer -> Integer -> m Integer
 computation x y = do
   let t1 = x * 2 + y
@@ -58,7 +57,7 @@ The type signature for `computation` is optional, and can be inferred by the com
 Now, let's try to use it under the two environments. Here's the code:
 
 
-```haskell
+``` {.haskell fancydiff=1 }
 main :: IO ()
 main = do
   putStrLn "Run computation as pure:"
@@ -76,7 +75,7 @@ main = do
 Let's try to run it:
 
 
-```haskell
+``` {.shell fancydiff=1 }
 # runghc test.hs
 Run computation as pure:
 Result: 90

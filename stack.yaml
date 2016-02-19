@@ -1,6 +1,15 @@
+require-stack-version: ">= 1.0.3"
 resolver: lts-5.2
 extra-deps:
 - pandoc-crossref-0.1.6.5
 - data-accessor-transformers-0.2.1.7
-
-
+packages:
+- location: https://github.com/da-x/fancydiff/archive/3275820da1cbcd8bba04a144a39c4b43c7b59403.zip
+  extra-dep: true
+- location: https://github.com/da-x/gitlib/archive/5b338169a2618337a60aaf17e2ab56a2654b1244.zip
+  extra-dep: true
+  subdirs:
+  - gitlib
+  - gitlib-libgit2
+  - hlibgit2
+- .

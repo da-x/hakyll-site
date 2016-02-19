@@ -10,6 +10,8 @@ import Site.Types
 
 import Hakyll
 
+import qualified Data.Text as T
+
 import Text.Pandoc
 import Text.Pandoc.Walk (walkM)
 
@@ -27,6 +29,14 @@ import Text.Blaze.Html.Renderer.String (renderHtml)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 
+import           Fancydiff.Lib               (getHighlighterFunc,
+                                              stringToHighlighter)
+import           Fancydiff.HTMLFormatting    ( htmlFormatting
+                                             , mkHtmlFormat
+                                             , HTMLStyles(..)
+                                             )
+import           Fancydiff.Themes            (brightBackground)
+
 pygmentsServer :: IO Streams
 pygmentsServer = do
   (inp, out, _, _) <- runInteractiveProcess "python" ["src/pig.py"] Nothing Nothing
@@ -38,18 +48,74 @@ pygments streams = walkM (generateCodeBlock streams)
 generateCodeBlock :: Streams -> Block -> Compiler Block
 generateCodeBlock streams (CodeBlock (_, classes, keyvals) contents) = do
   let lang = fromMaybe (if null classes then "text" else head classes) $ lookup "lang" keyvals
+      lineNumbers = fromMaybe False $ fmap (/= "") $ lookup "lineNumbers" keyvals
+      title = lookup "title" keyvals
 
-  code <- if lang == "text"
-            then return $ renderHtml $ H.toHtml contents
-            else pygmentize streams lang contents
+      onlyPygments = do
+          code <- if lang == "text"
+                    then return $ renderHtml $ H.toHtml contents
+                    else pygmentize streams lang contents
 
-  let colored = renderHtml $ H.pre $ H.code ! A.class_ (H.toValue $ "highlight language-" ++ lang) $ do
-                  preEscapedToHtml code
-      caption = maybe "" (renderHtml . H.figcaption . H.span . preEscapedToHtml) $ lookup "text" keyvals
-      composed = renderHtml $ H.figure ! A.class_ "codeblock" $ do
-                   preEscapedToHtml $ caption ++ colored
+          let colored = renderHtml $ H.pre $ H.code ! A.class_ (H.toValue $ "highlight language-" ++ lang) $ do
+                          preEscapedToHtml code
+              caption = maybe "" (renderHtml . H.figcaption . H.span . preEscapedToHtml) $ lookup "text" keyvals
+              composed = renderHtml $ H.figure ! A.class_ "codeblock" $ do
+                           preEscapedToHtml $ caption ++ colored
 
-  return $ RawBlock "html" composed
+          return $ RawBlock "html" composed
+
+      onlyFancydiff = do
+          let highlighter = stringToHighlighter $ T.pack lang
+              func = getHighlighterFunc highlighter
+              textContent = T.pack contents
+              maybeHighlighted = func textContent
+              addLineNumbersF t = T.concat
+                          [ "<table class=\"codeBox\"><tbody>"
+                          , titleText
+                          , "<tr>"
+                          , numbersText
+                          , "<td class=\"sourceCode ", lineWrap, "\">"
+                          , t
+                          , "</td></tr></tbody></table>"
+                          ]
+                    where
+                      titleText =
+                          case title of
+                             Just t2 -> T.concat
+                                  [ "<tr><td class=\"codeTitle\">"
+                                  , T.pack t2
+                                  , "</td></tr><tr></tr>"
+                                  ]
+                             Nothing -> ""
+                      numbersText =
+                          case lineNumbers of
+                             True -> T.concat
+                                  [ "<td class=\"lineNumbers\"><div class=\"lineNumbersDiv\"><pre>"
+                                  , T.unlines $ map (T.pack . show) [1..(length $ T.lines t)]
+                                  , "</div></pre></td>"
+                                  ]
+                             False -> ""
+                      lineWrap =
+                          case lineNumbers of
+                             True -> ""
+                             False -> "sourceCodeWrap"
+
+          case maybeHighlighted of
+              Left _ -> onlyPygments
+              Right highlighted -> do
+                  let withoutLineNumbers =
+                          htmlFormatting (mkHtmlFormat HTMLSCSS brightBackground) highlighted
+                      final = T.unpack $ T.concat
+                        [ "<div class=\"fancydiff-block\">"
+                        , addLineNumbersF withoutLineNumbers
+                        , "</div>"
+                        ]
+                  return $ RawBlock "html" $ final
+
+  case lookup "fancydiff" keyvals of
+      Nothing -> onlyPygments
+      Just _ -> onlyFancydiff
+
 generateCodeBlock _ x = return x
 
 pygmentize :: Streams -> String -> String -> Compiler String

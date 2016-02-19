@@ -34,6 +34,57 @@ $solar-green:   #718C00 !default; //
 // $solar-cyan:    #2aa198 !default; // haskell: let, where, operator
 // $solar-green:   #859900 !default; //
 
+.fancydiff-block {
+  margin: 1.5em;
+  @import "_fancydiff.scss";
+  table {
+    width: 100%;
+    border: 0px 0px 0px 0px;
+    .codeTitle {
+      background: #ddffff;
+      border-left: 0px;
+      border-right: 0px;
+      border-top: 0px;
+      border-bottom: 2px;
+      border-style: solid;
+      border-color: #88dddd;
+    }
+    .lineNumbers {
+      pre {
+          text-align: right;
+      }
+      padding-top: 0px;
+      padding-left: 0px;
+      padding-right: 0px;
+      padding-bottom: 0px;
+      background: #dddddd;
+    }
+    .lineNumbersDiv {
+      padding: 0.5em;
+    }
+    .sourceCode {
+      width: 100%;
+    }
+    .sourceCodeWrap {
+      pre {
+        white-space: pre-wrap;
+      }
+    }
+  }
+  .codeBox {
+    @extend .P_default;
+    margin: 1em;
+    padding: 0em;
+    border-radius: .25em;
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom: 0px;
+    box-shadow: .1em .1em .5em rgba(0,0,0,.45);
+  }
+  font-size: 14px;
+}
+
 .language-javascript {
   .kd { color: $solar-cyan; }
   .nx { color: inherit; }
