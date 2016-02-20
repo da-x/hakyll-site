@@ -36,6 +36,8 @@ import           Fancydiff.HTMLFormatting    ( htmlFormatting
                                              , HTMLStyles(..)
                                              )
 import           Fancydiff.Themes            (brightBackground)
+import           Fancydiff.Formatting        (combineFLists, applyMarkers,
+                                              flistToText, makeFreeForm)
 
 pygmentsServer :: IO Streams
 pygmentsServer = do
@@ -49,6 +51,14 @@ generateCodeBlock :: Streams -> Block -> Compiler Block
 generateCodeBlock streams (CodeBlock (_, classes, keyvals) contents) = do
   let lang = fromMaybe (if null classes then "text" else head classes) $ lookup "lang" keyvals
       lineNumbers = fromMaybe False $ fmap (/= "") $ lookup "lineNumbers" keyvals
+
+      markLookup i fieldName = lookup ("mark" ++ show i ++ fieldName) keyvals
+      marks = markN (1 :: Int)
+      markN idx = case (markLookup idx "Start", markLookup idx "End",
+                        markLookup idx "Class") of
+                      (Just l, Just r, Just c) -> (l, r, c):(markN (idx+1))
+                      _ -> []
+
       title = lookup "title" keyvals
 
       onlyPygments = do
@@ -68,7 +78,32 @@ generateCodeBlock streams (CodeBlock (_, classes, keyvals) contents) = do
           let highlighter = stringToHighlighter $ T.pack lang
               func = getHighlighterFunc highlighter
               textContent = T.pack contents
-              maybeHighlighted = func textContent
+
+              -- addMarks t [] = (Right $ mkPlain t, t)
+              -- addMarks t ((l, r, c):xs) = (root, textWithoutMarkers)
+              --     where
+              --         (previousMarkers, textContent) = addMarks t xs
+              --         flistWithMarkers =
+              --             applyMarkers (T.pack l) (T.pack r) (makeFreeForm $ T.pack c) textContent
+              --         textWithoutMarkers = flistToText flistWithMarkers
+              --         root = combineFLists textWithoutMarkers flistWithMarkers previousMarkers
+              --
+              -- Cannot use applyMarkers recursively. Need to be able to implement a 'delete' operation
+              -- on FList based on the removals in applyMarkers.
+
+              maybeHighlighted =
+                  case marks of
+                      [] -> func textContent
+                      ((l, r, c):_) ->
+                          let flistWithMarkers =
+                                  applyMarkers (T.pack l) (T.pack r) (makeFreeForm $ T.pack c)
+                                     textContent
+                              textWithoutMarkers = flistToText flistWithMarkers
+                           in case func textWithoutMarkers of
+                                Left err -> Left err
+                                Right highlighted ->
+                                    combineFLists textWithoutMarkers highlighted flistWithMarkers
+
               addLineNumbersF t = T.concat
                           [ "<table class=\"codeBox\"><tbody>"
                           , titleText
