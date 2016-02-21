@@ -5,9 +5,9 @@ published: 2016-02-20
 author: dan
 ---
 
-The [ST Monad](https://wiki.haskell.org/Monad/ST) provides a venerable method in Haskell for writing stateful imperative code. Writing such code, in contrast to the non-stateful approach, is sometimes better. Some algorithms are better understood or better illustrated with states, and another reason is increased performance. The difference between `ST` and `IO` is important, because when we implement an algorithm, we only want to deal with the internal states and not bother with side effects that don't belong to it. Allowing stateful algorithm to remain pure under `ST`, gives way to better code geneartion by the compiler.
+The [ST Monad](https://wiki.haskell.org/Monad/ST) provides a venerable method in Haskell for writing stateful imperative code. Writing such code, in contrast to the non-stateful approach, is sometimes better. Some algorithms are better understood or better illustrated with states, and another reason is increased performance. The difference between `ST` and `IO` is important, because when we implement an algorithm, we only want to deal with the internal states and not bother with side effects that don't belong to it. Allowing stateful algorithm to remain pure under `ST`, gives way to better code generation by the compiler.
 
-Some algorithms are better written with [Exceptions](https://wiki.haskell.org/Exception). For example, an algorithm for validating an expression tree may be such one. However, one needs to be aware that exceptions in pure code can only be caught in `IO`, unless [pure exceptions](https://hackage.haskell.org/package/exceptions) are used. We can use these pure exceptions under a [monad transformer](http://book.realworldhaskell.org/read/monad-transformers.html), but then we need to verify that there was no loss in performance. We suspect that the `CatchT` transformer would provide us a zero-cost abstraction, being a `newtype`. But how well would GHC succeed in optimizating away the transformations?
+Some algorithms are better written with [Exceptions](https://wiki.haskell.org/Exception). For example, an algorithm for validating an expression tree may be such one. However, one needs to be aware that exceptions in pure code can only be caught in `IO`, unless [pure exceptions](https://hackage.haskell.org/package/exceptions) are used. We can use these pure exceptions under a [monad transformer](http://book.realworldhaskell.org/read/monad-transformers.html), but then we need to verify that there was no significant loss in performance. We suspect that the `CatchT` transformer would provide us a zero-cost abstraction, being a `newtype`. But how well would GHC succeed in optimizing away the transformations?
 
 ### Fibonacci that throws, for kicks
 
@@ -17,22 +17,21 @@ First, let us look at the example for `ST` brought from the [Haskell Wiki](https
 fibST :: Integer -> Integer
 fibST n =
     if n < 2
-    then n
-    else runST $ do
-        x <- newSTRef 0
-        y <- newSTRef 1
-        fibST' n x y
+        then n
+        else runST $ do x <- newSTRef 0
+                        y <- newSTRef 1
+                        fibST' n x y
 
     where fibST' 0 x _ = readSTRef x
-          fibST' n x y = do
+          fibST' n' x y = do
               x' <- readSTRef x
               y' <- readSTRef y
               writeSTRef x y'
               writeSTRef y $! x'+y'
-              fibST' (n-1) x y
+              fibST' (n' - 1) x y
 ~~~~
 
-We would like to test the performance of pure exceptions. So, let us have a slightly modified version of it, being a modulo of Fibnacci using `Int`. The change of type from `Integer` to `Int` would be better for us when measuring performance, otherwise the run would have spent time adding really big numbers in each of the loop iteraion.
+We would like to test the performance of pure exceptions. So, let us have a slightly modified version of it, being a modulo of Fibonacci using `Int`. The change of type from `Integer` to `Int` would be better for us when measuring performance, otherwise the run would have spent time adding really big numbers in each one of the loop iterations.
 
 We will use this new `Exception` type,
 
@@ -57,13 +56,13 @@ instance Exception MyException
                y <- newSTRef 1
                fibMod' n x y
 
-   where
+    where
         fibMod' 0 x _ = readSTRef x
         fibMod' n' x y = do
             x' <- readSTRef x
             y' <- readSTRef y
             {* when (n' == 1000) $ do *}
-                {* throw $ MyException x' *}
+                {* throw $ MyException x' -- not a pure exception (yet!) *}
             writeSTRef x y'
             writeSTRef y $! x'+y'
             fibMod' (n'-1) x y
@@ -87,7 +86,7 @@ fibMod_E n =
                y <- {* lift $ *} newSTRef 1
                fibMod' n x y
 
-   where
+    where
         fibMod' 0 x _ = {* lift $ *} readSTRef x
         fibMod' n' x y = do
             x' <- {* lift $ *} readSTRef x
@@ -95,7 +94,7 @@ fibMod_E n =
             {* lift $ *} writeSTRef x y'
             {* lift $ *} writeSTRef y $! x'+y'
             when (abs n' == 1000) $ do
-                {* throwM $ *} MyException x'
+                {* throwM *} $ MyException x'
 
             {* let recurse = *} fibMod' (n'-1) x y
             {* if n <= 25000000 *}
@@ -104,7 +103,7 @@ fibMod_E n =
 
 ~~~~
 
-Can we degrate an `ST` exception back to an `IO` exception? Yes! Using the following function, that requires the `RankNTypes` extension for its type signature:
+Can we degrade an `ST` exception back to an `IO` exception? Yes! Using the following function, that requires the `RankNTypes` extension for its type signature:
 
 ~~~~ {.haskell fancydiff=1 }
 -- | A variant of `runST` for STCatch that turns all _uncaught_
