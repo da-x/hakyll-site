@@ -38,7 +38,7 @@ $solar-green:   #718C00 !default; //
   margin: 1.5em;
   @import "_fancydiff.scss";
   .sourceMarker {
-     background: #aaffcc;
+     background: #ccffcc;
   }
   table {
     width: 100%;
@@ -85,7 +85,7 @@ $solar-green:   #718C00 !default; //
     border-bottom: 0px;
     box-shadow: .1em .1em .5em rgba(0,0,0,.45);
   }
-  font-size: 14px;
+  font-size: 16p;
 }
 
 .language-javascript {
