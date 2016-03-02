@@ -149,21 +149,54 @@ And the result is:
 ~~~~ {.shell fancydiff=1 mark1Start="{*\ " mark1End="\ *}" mark1Class=sourceMarker }
 ------ With lots of catches
 caught: MyException (-5541175486947481557)
-Total time: 0.5780613910173997
+Total time: 0.6768422469031066
 -1
-Total time: 1.5058501469902694
+Total time: 1.5523557260166854
 
 ------ With just one catch
 caught: MyException 5934185968946882193
-Total time: 0.28950906603131443
+Total time: 0.32111207104753703
 -1
-Total time: 0.7461852789856493
+Total time: 0.7558517289580777
 
 ------ With no catch
 caught: MyException 4809429493926266912
-Total time: 0.2883566220989451
+Total time: 0.32045713800471276
 caught: MyException 4809429493926266912
-{* Total time: 0.2663854160346091 *}
+{* Total time: 0.26791215199045837 *}
 ~~~~
 
 The first two results are of no surprise. Both the `if` and `catch` incur their overheads. The last result is more peculiar, because it suggests that the code for `fibMod_E` emanated from the compiler is _even faster_, despite of the `if`, as long as there are no wrapping `catch`'s in the evaluation. The difference probably boils down to the generated machine code, but I'd leave that to a topic of a different post.
+
+### An extra test
+
+(edit: added March 2, 2016)
+
+Edward Kmett [pointed out](https://www.reddit.com/r/haskell/comments/47evoh/performance_of_the_st_monad_with_pure_exceptions/d0cj9z1) on Reddit that perhaps it would be interesting to test with `unsafeSTToIO`. So I've added the following cases (and also regenerated the results above, because every little change can affect the optimizer, and they varied slightly).
+
+~~~~ {.haskell fancydiff=1 }
+    putStrLn "------ With lots of catches"
+    timeIt $ (unsafeSTToIO $ fibMod   50000000) >>= print
+    putStrLn "\n------ With just one catch"
+    timeIt $ (unsafeSTToIO $ fibMod   25000001) >>= print
+    putStrLn "\n------ With no catch"
+    timeIt $ (unsafeSTToIO $ fibMod   25000000) >>= print
+~~~~
+
+The additional output is:
+
+~~~~ {.shell fancydiff=1 mark1Start="{*\ " mark1End="\ *}" mark1Class=sourceMarker }
+------ With lots of catches
+caught: MyException (-5541175486947481557)
+Total time: 0.5766234899638221
+
+------ With just one catch
+caught: MyException 5934185968946882193
+Total time: 0.2883113300194964
+
+------ With no catch
+caught: MyException 4809429493926266912
+{* Total time: 0.29055844293907285 *}
+~~~~
+
+For the first two cases the result are around 11% better than the pure `runST`. Interestingly, for the third one `runSTthrowIO` still wins.
