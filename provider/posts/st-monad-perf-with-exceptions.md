@@ -168,7 +168,7 @@ caught: MyException 4809429493926266912
 
 The first two results are of no surprise. Both the `if` and `catch` incur their overheads. The last result is more peculiar, because it suggests that the code for `fibMod_E` emanated from the compiler is _even faster_, despite of the `if`, as long as there are no wrapping `catch`'s in the evaluation. The difference probably boils down to the generated machine code, but I'd leave that to a topic of a different post.
 
-### An extra test
+### A few extra tests
 
 (edit: added March 2, 2016)
 
@@ -200,3 +200,61 @@ caught: MyException 4809429493926266912
 ~~~~
 
 For the first two cases the result are around 11% better than the pure `runST`. Interestingly, for the third one `runSTthrowIO` still wins.
+
+An even more drastic approach is to use `unsafeIOToST` and `unsafeSTToIO` in conjunction, modifying the original `fibMod`, allowing to freely insert the the less pure `IO`-based `catch` while keeping it in `ST` only from an API's perspective. It's not entirely sound in terms of exception handling, but it is worth presenting.
+
+~~~~ {.haskell fancydiff=1 mark1Start="{*\ " mark1End="\ *}" mark1Class=sourceMarker  }
+fibMod_H :: Int -> ST s Int
+fibMod_H n =
+    if n < 2
+       then return n
+       else do x <- newSTRef 0
+               y <- newSTRef 1
+               fibMod' n x y
+
+    where
+        fibMod' 0 x _ = readSTRef x
+        fibMod' n' x y = do
+            x' <- readSTRef x
+            y' <- readSTRef y
+            writeSTRef x y'
+            writeSTRef y $! x'+y'
+            when (n' == 1000) $ do
+                throw $ MyException x'
+
+            let recurse = fibMod' (n'-1) x y
+            if n <= 25000000
+               then recurse
+               else {* unsafeIOToST $ *}
+                       catch ({* unsafeSTToIO *} recurse)
+				       (\(MyException _) -> return (-1))
+~~~~
+
+With the prints:
+
+~~~~ {.haskell fancydiff=1 }
+    putStrLn "------ With lots of catches"
+    timeIt $ print $ runST        $ fibMod_H 50000000
+    putStrLn "\n------ With just one catch"
+    timeIt $ print $ runST        $ fibMod_H 25000001
+    putStrLn "\n------ With no catch"
+    timeIt $ print $ runST        $ fibMod_H 25000000
+~~~~
+
+However, it does not improve on our cases:
+
+~~~~ {.shell fancydiff=1 mark1Start="{*\ " mark1End="\ *}" mark1Class=sourceMarker }
+------ With lots of catches
+-1
+Total time: 3.401594614959322
+
+------ With just one catch
+-1
+Total time: 1.2730798620032147
+
+------ With no catch
+caught: MyException 4809429493926266912
+Total time: 0.30070900300052017
+~~~~
+
+The first two cases are considerably worse, and the third is still a bit better than using `STCatch`, but it's not representive of the common case where `catch` is probably going to appear in the evaluation at least once. Final conclusion is that pure exceptions are still a win, if we wish to remain sound.
