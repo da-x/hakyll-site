@@ -4,9 +4,7 @@ extra-deps:
 - pandoc-crossref-0.1.6.5
 - data-accessor-transformers-0.2.1.7
 packages:
-- location: 
-    git: /home/dan/gh/fancydiff
-    commit: 1683cc1d3b2350e25f9f8b92fd0ff769a024b1ef
+- location: https://github.com/da-x/fancydiff/archive/10bbc539ed2a32e885d2c3b86c5ca7c950a1114b.zip
   extra-dep: true
 - location: https://github.com/da-x/gitlib/archive/5b338169a2618337a60aaf17e2ab56a2654b1244.zip
   extra-dep: true

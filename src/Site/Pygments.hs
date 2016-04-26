@@ -33,7 +33,7 @@ import           Fancydiff.Lib               (getHighlighterFunc,
                                               stringToHighlighter)
 import           Fancydiff.HTMLFormatting    ( htmlFormatting
                                              , mkHtmlFormat
-                                             , HTMLStyles(..)
+                                             , HTMLStyle(..)
                                              )
 import           Fancydiff.Themes            (brightBackground)
 import           Fancydiff.Formatting        (combineFLists, applyMarkers,
@@ -102,7 +102,7 @@ generateCodeBlock streams (CodeBlock (_, classes, keyvals) contents) = do
                            in case func textWithoutMarkers of
                                 Left err -> Left err
                                 Right highlighted ->
-                                    combineFLists textWithoutMarkers highlighted flistWithMarkers
+                                    Right $ combineFLists textWithoutMarkers highlighted flistWithMarkers
 
               addLineNumbersF t = T.concat
                           [ "<table class=\"codeBox\"><tbody>"
