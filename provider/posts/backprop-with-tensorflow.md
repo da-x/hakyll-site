@@ -18,7 +18,6 @@ First, we need to load TensorFlow and setup the basic parts of the graph - input
 
 import tensorflow
 import tensorflow as tf
-import sys
 
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
