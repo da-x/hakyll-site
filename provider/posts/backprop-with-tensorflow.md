@@ -48,7 +48,7 @@ def sigma(x):
 
 ## The forward propagation
 
-Provided that the input image is given by the $ a_0 $ matrix, calculating forward propagation for multiple
+Provided that the input image is given by the $a_0$ matrix, calculating forward propagation for multiple
 images at a time can be done with simple matrix multiplication, defined as such:
 
 $$
