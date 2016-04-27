@@ -29,7 +29,8 @@ data Expr
    | Cos Expr       -- cos a
    deriving (Show, Eq, Ord)
 ~~~~
-~
+
+We shall be able to derive symbolic gradients for any function built with this data type.
 
 # Poor man's pretty-printing
 
