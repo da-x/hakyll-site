@@ -7,7 +7,7 @@ author: dan
 
 When I first read about neural network in Michael Nielsen's [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/), I was excited to find a good source that explains the material along with actual code. However there was a rather steep jump in the part that describes the basic math and the part that goes about implementing it, and it was especially apparant in the  `numpy`-based code that implements backward propagation.
 
-So, in order to explain it better to myself, and learn about [TensorFlow](https://www.tensorflow.org/) in the process, I took it upon myself to implement the first network in the book using TensorFlow by two means. First, manually defining the back propagation step, and the second - letting TensorFlow do the hard work.
+So, in order to explain it better to myself, and learn about [TensorFlow](https://www.tensorflow.org/) in the process, I took it upon myself to implement the first network in the book using TensorFlow by two means. First, _manually_ defining the back propagation step, and the second - letting TensorFlow do the hard work using [automatic differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation).
 
 # Setup
 
@@ -200,7 +200,7 @@ Extracting MNIST_data/t10k-labels-idx1-ubyte.gz
 923.0
 ```
 
-## Automatic deriviation
+## Automatic differentiation
 
 The great part about TensorFlow is its ability to derive the step function on its own. So, instead of the rather complicated 'Backward propagation' and 'Updating the network' given above for educational purposes ([@sec:back] and [@sec:upd]), we can simply write:
 
