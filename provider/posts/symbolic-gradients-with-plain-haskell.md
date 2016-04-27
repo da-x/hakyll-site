@@ -46,17 +46,17 @@ fshow (Sin e)     = concat ["sin(", fshow e, ")"]
 fshow (Cos e)     = concat ["cos(", fshow e, ")"]
 ~~~~
 
-This implementation is basic that a sequence of summations will bear a horrible representation similar to `(x1 + (x2 + (x3 + (...))))` - however it's enough to get us going.
+This implementation is basic in so that a sequence of summations will bear a horrible representation similar to `(x1 + (x2 + (x3 + (...))))` - however it's enough to get us going.
 
 # Sample
 
-The [Wikipedia page for Automatic Differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) uses the following function:
+The [Wikipedia page for Automatic Differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) demonstrates with the following function:
 
 $$
 (x_1, x_2) = sin x_1 + x_1x_2
 $$
 
-Should be easy enough to represent it with our Haskell data, and use `fshow` from above:
+It should be easy enough to represent it with our Haskell data, and use `fshow` from above:
 
 ~~~~ {.haskell fancydiff=1 }
 λ> let wikipediaFunc = (Sin (Term 1)) `Add` ((Term 1) `Mul` (Term 2))
