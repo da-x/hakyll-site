@@ -31,6 +31,40 @@ data Expr
 ~~~~
 ~
 
+# Poor man's pretty-printing
+
+One cannot go by without a nice String representation:
+
+~~~~ {.haskell fancydiff=1 }
+fshow :: Expr -> String
+fshow (Term v)    = concat ["x", show v]
+fshow (Lit v)     = show v
+fshow (Mul e1 e2) = concat ["(", fshow e1, " * ", fshow e2, ")"]
+fshow (Add e1 e2) = concat ["(", fshow e1, " + ", fshow e2, ")"]
+fshow (Neg e)     = concat ["-(", fshow e, ")"]
+fshow (Sin e)     = concat ["sin(", fshow e, ")"]
+fshow (Cos e)     = concat ["cos(", fshow e, ")"]
+~~~~
+
+This implementation is basic that a sequence of summations will bear a horrible representation similar to `(x1 + (x2 + (x3 + (...))))` - however it's enough to get us going.
+
+# Sample
+
+The [Wikipedia page for Automatic Differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) uses the following function:
+
+$$
+(x_1, x_2) = sin x_1 + x_1x_2
+$$
+
+Should be easy enough to represent it with our Haskell data, and use `fshow` from above:
+
+~~~~ {.haskell fancydiff=1 }
+λ> let wikipediaFunc = (Sin (Term 1)) `Add` ((Term 1) `Mul` (Term 2))
+
+λ> fshow wikipediaFunc
+"(sin(x1) + (x1 * x2))"
+~~~~
+
 # Gradient
 
 The `gradient` function below takes an expression, and returns a map from each term number to the expression that computes it. The definition of the function is recursive and based on known simple derivation rules:
