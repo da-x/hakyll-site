@@ -54,7 +54,7 @@ This implementation is basic in so that a sequence of summations will bear a hor
 The [Wikipedia page for Automatic Differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) demonstrates with the following function:
 
 $$
-(x_1, x_2) = sin x_1 + x_1x_2
+f(x_1, x_2) = sin x_1 + x_1x_2
 $$
 
 It should be easy enough to represent it with our Haskell data, and use `fshow` from above:
