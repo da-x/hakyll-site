@@ -108,7 +108,7 @@ showGradient :: Expr -> IO ()
 showGradient func = do
     putStrLn $ "f(..) = " ++ fshow func
 
-    forM_ (Map.toList $ deriveMany func) $ \(k, v) -> do
+    forM_ (Map.toList $ gradient func) $ \(k, v) -> do
         putStrLn $ "∂f / ∂" ++ fshow (Term k) ++ " = " ++ (fshow . simplify) v
 ~~~~
 
