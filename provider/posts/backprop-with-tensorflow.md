@@ -83,7 +83,7 @@ $$
 
 
 ``` { .python fancydiff=on }
-d_a = tf.sub(a_2, y)
+diff = tf.sub(a_2, y)
 ```
 
 ## The sigmoid prime function
@@ -119,7 +119,7 @@ $$
 It's also one-to-one with:
 
 ``` { .python fancydiff=on }
-d_z_2 = tf.mul(d_a, sigmaprime(z_2))
+d_z_2 = tf.mul(diff, sigmaprime(z_2))
 d_b_2 = d_z_2
 d_w_2 = tf.matmul(tf.transpose(a_1), d_z_2)
 
