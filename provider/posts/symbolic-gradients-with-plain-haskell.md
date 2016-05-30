@@ -54,7 +54,7 @@ This implementation is basic in so that a sequence of summations will bear a hor
 The [Wikipedia page for Automatic Differentiation](https://en.wikipedia.org/wiki/Automatic_differentiation) demonstrates with the following function:
 
 $$
-f(x_1, x_2) = sin x_1 + x_1x_2
+f(x_1, x_2) = \sin x_1 + x_1x_2
 $$
 
 It should be easy enough to represent it with our Haskell data, and use `fshow` from above:
@@ -126,7 +126,7 @@ Looks that it does. We have arrived at the same results as Wikipedia.
 
 $$
 \begin{align}
-& \frac{∂ f}{∂ x_1} = cos x_1 + x_2 \\
+& \frac{∂ f}{∂ x_1} = \cos x_1 + x_2 \\
 & \frac{∂ f}{∂ x_2} = x_1 \\
 \end{align}
 $$
