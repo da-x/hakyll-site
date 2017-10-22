@@ -8,4 +8,4 @@ I tend to spread on the full programming spectrum, from low-level Linux kernel h
 
 Other interests are playing and studying music, languages, and knowledge in various fields of science. Academically, I am focused on Computer Science.
 
-Without starting any flame-wars, my editor of choice is [Emacs](http://en.wikipedia.org/wiki/Emacs) and my desktop OS is [Fedora Linux](http://en.wikipedia.org/wiki/Fedora_%28operating_system%29).
+Without starting any flame-wars, my editor of choice is [Vim](http://en.wikipedia.org/wiki/Vim) and my desktop OS is [Fedora Linux](http://en.wikipedia.org/wiki/Fedora_%28operating_system%29).
